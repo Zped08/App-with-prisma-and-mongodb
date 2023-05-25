@@ -26,6 +26,7 @@ model User {
   //opción @unique para asegurarse de que cada valor de correo 
   //electrónico sea único en la base de datos, evitando duplicados.
   password  String
+  profile Profile 
 }
 
 generator client {
