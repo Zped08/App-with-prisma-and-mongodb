@@ -7,6 +7,8 @@ export default function login() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    firstName: "",
+    lastName: "",
   });
 
   //  se encargará de actualizar el estado formData
@@ -31,18 +33,22 @@ export default function login() {
   return (
     <Layout>
       <div className="h-screen flex justify-center items-center flex-col gap-y-4">
+        <h2 className="text-5xl font-extrabold text-yellow-300">
+          Welcome to Kudos!
+        </h2>
         <button
           onClick={() => setAction(action == "login" ? "register" : "login")}
           className="absolute top-8 right-8 rounded-xl bg-yellow-300 font-semibold text-blue-600 px-3 py-2 transition duration-300 ease-in-out hover:bg-yellow-400 hover:-translate-y-1"
         >
           {action === "login" ? "Sign Up" : "Sign In"}
         </button>
-       {/* mostrar un mensaje diferente en cada formulario: */}
+        {/* mostrar un mensaje diferente en cada formulario: */}
         <p className="font-semibold text-slate-300">
           {action === "login"
             ? "Log In To Give Some Praise!"
             : "Sign Up To Get Started!"}
         </p>
+
         <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
           <FormField
             htmlFor="email"
@@ -57,12 +63,36 @@ export default function login() {
             value={formData.password}
             onChange={(e) => handleInputChange(e, "password")}
           />
+          {/*  campos que se representan condicionalmente en función de si está 
+          viendo el formulario de inicio de sesión o de registro. */}
+          {action === "register" && (
+            <>
+              <FormField
+                htmlFor="firstName"
+                label="First Name"
+                onChange={(e) => handleInputChange(e, "firstName")}
+                value={formData.firstName}
+              />
+              <FormField
+                htmlFor="lastName"
+                label="Last Name"
+                onChange={(e) => handleInputChange(e, "lastName")}
+                value={formData.lastName}
+              />
+            </>
+          )}
+
           <div className="w-full text-center">
-            <input
+            {/*  El valor se establece en cualquiera que sea el estado action. Cuando se envía el formulario, 
+            este valor se pasará junto con los datos del formulario como _action. */}
+            <button
               type="submit"
+              name="_action"
+              value={action}
               className="rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold transition duration-300 ease-in-out hover:bg-yellow-400 hover:-translate-y-1"
-              value="Sign In"
-            />
+            >
+              {action === "login" ? "Sign In" : "Sign Up"}
+            </button>
           </div>
         </form>
       </div>
