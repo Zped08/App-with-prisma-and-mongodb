@@ -3,22 +3,40 @@ import Layout from "./components/Layout";
 import FormField from "./components/form-field";
 
 export default function login() {
+  const [action, setAction] = useState("login");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  // Updates the form data when an input changes
+  //  se encargará de actualizar el estado formData
+  // recibe dos argumentos
   const handleInputChange = (
+    // evento de cambio de entrada
     event: React.ChangeEvent<HTMLInputElement>,
+    //clave del campo que se va a actualizar en formData
     field: string
   ) => {
+    //actualiza el estado de formData mediante
+    // la función de actualización pasada como argumento
     setFormData((form) => ({ ...form, [field]: event.target.value }));
+    //(form)función de actualización del estado que se pasa a setFormData
+    // setFormData realiza una copia utilizando el operador spread (...form)
+    //La función de actualización toma el estado actual de formData (form en este caso)
+    // realiza una copia del mismo utilizando el operador spread (...form)
+    //y luego reemplaza el valor del campo especificado
+    //([field]) con el nuevo valor del evento (event.target.value)
   };
 
   return (
     <Layout>
       <div className="h-screen flex justify-center items-center flex-col gap-y-4">
+        <button
+          onClick={() => setAction(action == "login" ? "register" : "login")}
+          className="absolute top-8 right-8 rounded-xl bg-yellow-300 font-semibold text-blue-600 px-3 py-2 transition duration-300 ease-in-out hover:bg-yellow-400 hover:-translate-y-1"
+        >
+          {action === "login" ? "Sign Up" : "Sign In"}
+        </button>
         <h2 className="text-yellow-300 font-extrabold text-5xl">login</h2>
         <p className="font-semibold text-slate-300">
           Login in to give some praise
