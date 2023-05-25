@@ -109,6 +109,7 @@ export async function requireUserId(request: Request, redirectTo: string = new U
   //Luego, se lanza una excepción utilizando throw redirect(...)
     const searchParams = new URLSearchParams([['redirectTo', redirectTo]])
     throw redirect(`/login?${searchParams}`)
+  
   }
   //Si se encuentra un ID de usuario válido en la sesión, se devuelve el ID de usuario.
   return userId

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
 import FormField from "../components/form-field";
-import { ActionFunction, json } from "@remix-run/node";
+import { ActionFunction, json, LoaderFunction, redirect } from "@remix-run/node";
 import {
   validateEmail,
   validateName,
   validatePassword,
 } from "~/utils/validators.server";
-import {register, login} from "../utils/auth.server";
+import {register, login, getUser} from "../utils/auth.server";
 
 
 // función de acción asincrónica que se ejecuta cuando se realiza una solicitud a la ruta correspondiente.
@@ -76,6 +76,12 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ error: `Invalid Form Data` }, { status: 400 });
   }
 };
+
+export const loader: LoaderFunction = async ({ request }) => {
+  // If there's already a user in the session, redirect to the home page
+  return (await getUser(request)) ? redirect('/') : null
+}
+
 
 export default function Login() {
   const [action, setAction] = useState("login");
