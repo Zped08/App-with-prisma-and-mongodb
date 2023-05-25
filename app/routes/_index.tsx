@@ -1,5 +1,11 @@
-/* import type { V2_MetaFunction } from "@remix-run/node";
+ import type { V2_MetaFunction } from "@remix-run/node";
+ import { LoaderFunction } from '@remix-run/node'
+import { requireUserId } from '~/utils/auth.server'
 
+export const loader: LoaderFunction = async ({ request }) => {
+  await requireUserId(request)
+  return null
+}
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -8,7 +14,7 @@ export const meta: V2_MetaFunction = () => {
   ];
 };
 
- export default function Index() {
+ /* export default function Index() {
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
       <h1>Welcome to Remix</h1>
@@ -39,7 +45,7 @@ export const meta: V2_MetaFunction = () => {
       </ul>
     </div>
   );
-} */
+} */ 
 
 export default function Index() {
   return (

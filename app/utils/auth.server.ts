@@ -47,7 +47,7 @@ export async function createUserSession(userId: string, redirectTo: string) {
 //recibe un parámetro users de tipo registerForm,
 //que probablemente sea un objeto que contiene información
 //sobre el usuario que se está registrando.
-export default async function register(users: registerForm) {
+export async function register(users: registerForm) {
   //se utiliza await para realizar una consulta a la base de datos utilizando prisma
   //La consulta verifica si ya existe un usuario con el mismo correo electrónico (email) en la base de datos.
   const exists = await prisma.user.count({ where: { email: users.email } });
@@ -73,6 +73,7 @@ export default async function register(users: registerForm) {
 }
 
 export async function login({ email, password }: LoginForm) {
+  console.log(login)
   // 2
   const user = await prisma.user.findUnique({
     where: { email },
@@ -85,4 +86,76 @@ export async function login({ email, password }: LoginForm) {
   // 4
   //return { id: user.id, email }
   return createUserSession(user.id, "/");
+}
+
+
+/* ***Authorize users on private routes*** */
+
+
+// request representa el objeto de solicitud HTTP recibido 
+//por el servidor
+// redirectTo es una cadena opcional que representa la URL a la que se 
+//redirigirá si no se encuentra un ID de usuario en la sesión.
+export async function requireUserId(request: Request, redirectTo: string = new URL(request.url).pathname) {
+  // getuserSession obtiene la sesión del usuario.
+  const session = await getUserSession(request)
+  //userId intenta obtener el ID de usuario
+  //Si no se encuentra un ID de usuario o el ID de usuario no es una cadena,
+  // significa que el usuario no está autenticado.
+  const userId = session.get('userId')
+  if (!userId || typeof userId !== 'string') {
+  //se crea un objeto URLSearchParams que contiene el parámetro redirectTo 
+  //con el valor de la URL a la que se debe redirigir. 
+  //Luego, se lanza una excepción utilizando throw redirect(...)
+    const searchParams = new URLSearchParams([['redirectTo', redirectTo]])
+    throw redirect(`/login?${searchParams}`)
+  }
+  //Si se encuentra un ID de usuario válido en la sesión, se devuelve el ID de usuario.
+  return userId
+}
+
+// Toma la sesión del usuario actual en función de la cookie de la solicitud.
+function getUserSession(request: Request) {
+  // utiliza la función storage.getSession para obtener 
+//la sesión del usuario. 
+  //request.headers.get('Cookie') se utiliza para obtener el valor de la 
+  //cabecera Cookie de la solicitud y pasarlo a la función getSession
+  return storage.getSession(request.headers.get('Cookie'))
+}
+
+// utiliza la función getUserSession para obtener la sesión del usuario basada en la solicitud recibida.
+async function getUserId(request: Request) {
+  const session = await getUserSession(request)
+  //se utiliza el método get de la sesión para obtener el valor asociado a la clave 'userId'
+  const userId = session.get('userId')
+  if (!userId || typeof userId !== 'string') return null
+  return userId
+}
+
+export async function getUser(request: Request) {
+  //utiliza la función getUserId para obtener el ID del 
+  //usuario asociado a la sesión actual, basándose en la solicitud recibida.
+  const userId = await getUserId(request)
+  if (typeof userId !== 'string') {
+    return null
+  }
+//Se utiliza el objeto select para especificar qué propiedades del usuario deseamos obtener en la respuesta
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, profile: true },
+    })
+    return user
+  } catch {
+    throw logout(request)
+  }
+}
+//Destruye la sesión actual y redirige al usuario a la pantalla de inicio de sesión
+export async function logout(request: Request) {
+  const session = await getUserSession(request)
+  return redirect('/login', {
+    headers: {
+      'Set-Cookie': await storage.destroySession(session),
+    },
+  })
 }
