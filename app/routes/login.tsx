@@ -37,9 +37,11 @@ export default function login() {
         >
           {action === "login" ? "Sign Up" : "Sign In"}
         </button>
-        <h2 className="text-yellow-300 font-extrabold text-5xl">login</h2>
+       {/* mostrar un mensaje diferente en cada formulario: */}
         <p className="font-semibold text-slate-300">
-          Login in to give some praise
+          {action === "login"
+            ? "Log In To Give Some Praise!"
+            : "Sign Up To Get Started!"}
         </p>
         <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
           <FormField
