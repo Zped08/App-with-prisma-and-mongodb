@@ -1,22 +1,9 @@
 import { registerForm, LoginForm } from "./types.server";
 import { prisma } from "./prisma.server";
-import { json, createCookieSessionStorage } from "@remix-run/node";
+import {redirect, json, createCookieSessionStorage } from "@remix-run/node";
 import { createUser } from "./user.server";
 import bcrypt from 'bcryptjs'
 
-export async function login({ email, password }: LoginForm) {
-  // 2
-  const user = await prisma.user.findUnique({
-    where: { email },
-  })
-
-  // 3
-  if (!user || !(await bcrypt.compare(password, user.password)))
-    return json({ error: `Incorrect login` }, { status: 400 })
-
-  // 4
-  return { id: user.id, email }
-}
 
 const sessionSecret = process.env.SESSION_SECRET
 if (!sessionSecret) {
@@ -41,6 +28,21 @@ const storage = createCookieSessionStorage({
     httpOnly: true,
   },
 })
+
+//crea una nueva sesión
+export async function createUserSession(userId: string, redirectTo: string) {
+  // Se utiliza la función storage.getSession() para obtener la sesión actual.
+  const session = await storage.getSession()
+  //establece el ID de usuario de esa sesión en el ID del usuario que ha iniciado sesión.
+  session.set('userId', userId)
+  //redirige al usuario a una ruta que puede especificar al llamar a esta función.
+  return redirect(redirectTo, {
+    //confirma la sesión al configurar el encabezado de la cookie.
+    headers: {
+      'Set-Cookie': await storage.commitSession(session),
+    },
+  })
+}
 
 //recibe un parámetro users de tipo registerForm,
 //que probablemente sea un objeto que contiene información
@@ -67,4 +69,20 @@ export default async function register(users: registerForm) {
       { status: 400 }
     );
   }
+    return createUserSession(newUser.id, '/');
+}
+
+export async function login({ email, password }: LoginForm) {
+  // 2
+  const user = await prisma.user.findUnique({
+    where: { email },
+  })
+
+  // 3
+  if (!user || !(await bcrypt.compare(password, user.password)))
+  return json({ error: `Incorrect login` }, { status: 400 })
+
+  // 4
+  //return { id: user.id, email }
+  return createUserSession(user.id, "/");
 }
