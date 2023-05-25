@@ -5,3 +5,8 @@ export type registerForm = {
     lastName : string
 
 }
+
+export type LoginForm = {
+  email: string
+  password: string
+}
