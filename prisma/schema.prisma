@@ -1,44 +1,89 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+// prisma/schema.prisma
 
-model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  //Define el campo "id" como una cadena de texto y lo marca como el
-  // identificador principal del modelo (@id). Además, se establece 
-  //la opción @default(auto()) para que se genere automáticamente 
-  //un valor para el campo cuando se crea un nuevo usuario. 
-  //El atributo @map("_id") especifica que este campo se mapea a 
-  //la columna "_id" en la base de datos. 
-  //Por último, @db.ObjectId indica que el campo es un 
-  //ObjectId de la base de datos.
-  createdAt DateTime @default(now())
-  //Define el campo "createdAt" como un objeto DateTime y 
-  //establece la opción @default(now()) para que se establezca 
-  //automáticamente la fecha y hora actual cuando se crea un 
-  //nuevo usuario.
-  updatedAt DateTime @updatedAt
-  //Define el campo "updatedAt" 
-  //como un objeto DateTime y utiliza la directiva
-  // @updatedAt para que se actualice automáticamente 
-  //con la fecha y hora actual cada vez que se modifique el usuario.
-  email     String   @unique
-  //Define el campo "email" como una cadena de texto y utiliza la 
-  //opción @unique para asegurarse de que cada valor de correo 
-  //electrónico sea único en la base de datos, evitando duplicados.
-  password  String
-  profile Profile 
-}
-
+// ...
 generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
-}
-
-type Profile {
-  firstName String
-  lastName  String
-}
+    provider = "prisma-client-js"
+  }
+  
+  datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+  }
+  
+  model User {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    //Define el campo "id" como una cadena de texto y lo marca como el
+    // identificador principal del modelo (@id). Además, se establece 
+    //la opción @default(auto()) para que se genere automáticamente 
+    //un valor para el campo cuando se crea un nuevo usuario. 
+    //El atributo @map("_id") especifica que este campo se mapea a 
+    //la columna "_id" en la base de datos. 
+    //Por último, @db.ObjectId indica que el campo es un 
+    //ObjectId de la base de datos.
+    createdAt DateTime @default(now())
+    //Define el campo "createdAt" como un objeto DateTime y 
+    //establece la opción @default(now()) para que se establezca 
+    //automáticamente la fecha y hora actual cuando se crea un 
+    //nuevo usuario.
+    updatedAt DateTime @updatedAt
+    //Define el campo "updatedAt" 
+    //como un objeto DateTime y utiliza la directiva
+    // @updatedAt para que se actualice automáticamente 
+    //con la fecha y hora actual cada vez que se modifique el usuario.
+    email     String   @unique
+    //Define el campo "email" como una cadena de texto y utiliza la 
+    //opción @unique para asegurarse de que cada valor de correo 
+    //electrónico sea único en la base de datos, evitando duplicados.
+    password  String
+    profile Profile 
+    authoredKudos Kudo[]  @relation("AuthoredKudos")
+    kudos         Kudo[]  @relation("RecievedKudos")
+  }
+  
+  model Kudo {
+    id          String     @id @default(auto()) @map("_id") @db.ObjectId
+    message     String
+    createdAt   DateTime   @default(now())
+    style       KudoStyle?
+    author      User       @relation(references: [id], fields: [authorId], "AuthoredKudos")
+    authorId    String     @db.ObjectId
+    recipient   User       @relation(references: [id], fields: [recipientId], "RecievedKudos")
+    recipientId String     @db.ObjectId
+  }
+  
+  
+  
+  type Profile {
+    firstName String
+    lastName  String
+  }
+  
+  
+  type KudoStyle {
+    backgroundColor Color @default(YELLOW)
+    textColor       Color @default(WHITE)
+    emoji           Emoji @default(THUMBSUP)
+  }
+  
+  enum Emoji {
+    THUMBSUP
+    PARTY
+    HANDSUP
+  }
+  
+  enum Department {
+    MARKETING
+    SALES
+    ENGINEERING
+    HR
+  }
+  
+  enum Color {
+    RED
+    GREEN
+    YELLOW
+    BLUE
+    WHITE
+  }

@@ -1,12 +1,12 @@
 import bcrypt from "bcryptjs";
-import type { registerForm } from "./types.server";
+import type { RegisterForm } from "./types.server";
 import { prisma } from "./prisma.server";
 
 /* **** Aqui iran las funciones relacionadas usuario **** */
 
 //Esta función toma un parámetro user de tipo registerForm,
 //que probablemente contiene información sobre el usuario que se va a crear.
-export const createUser = async (user: registerForm) => {
+export const createUser = async (user: RegisterForm) => {
   const passwordHash = await bcrypt.hash(user.password, 10);
   // bcrypt.hash() generar el hash de la contraseña del usuario.
   //El primer argumento es la contraseña sin procesar (user.password)
@@ -39,6 +39,14 @@ export const getOtherUsers = async (userId: string) => {
       profile: {
         firstName: 'asc',
       },
+    },
+  })
+}
+
+export const getUserById = async (userId: string) => {
+  return await prisma.user.findUnique({
+    where: {
+      id: userId,
     },
   })
 }

@@ -1,15 +1,20 @@
+import { useRef, useEffect } from 'react'
 import { useState } from "react";
+import { ActionFunction, json, LoaderFunction, redirect } from "@remix-run/node";
+import { useActionData } from '@remix-run/react'
 import Layout from "../components/Layout";
 import FormField from "../components/form-field";
-import { ActionFunction, json, LoaderFunction, redirect } from "@remix-run/node";
 import {
   validateEmail,
   validateName,
   validatePassword,
 } from "~/utils/validators.server";
 import {register, login, getUser} from "../utils/auth.server";
-import { useActionData } from '@remix-run/react'
-import { useRef, useEffect } from 'react'
+
+export const loader: LoaderFunction = async ({ request }) => {
+  // If there's already a user in the session, redirect to the home page
+  return (await getUser(request)) ? redirect('/') : null
+}
 
 
 // función de acción asincrónica que se ejecuta cuando se realiza una solicitud a la ruta correspondiente.
@@ -79,13 +84,9 @@ export const action: ActionFunction = async ({ request }) => {
   }
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  // If there's already a user in the session, redirect to the home page
-  return (await getUser(request)) ? redirect('/') : null
-}
-
-
 export default function Login() {
+  const actionData = useActionData()
+  const firstLoad = useRef(true)
   const [action, setAction] = useState("login");
 /*   const [formData, setFormData] = useState({
     email: "",
@@ -93,9 +94,7 @@ export default function Login() {
     firstName: "",
     lastName: "",
   }); */
-  const actionData = useActionData()
   // 2
-  const firstLoad = useRef(true)
   const [errors, setErrors] = useState(actionData?.errors || {})
   const [formError, setFormError] = useState(actionData?.error || '')
   // 3
@@ -106,6 +105,25 @@ export default function Login() {
     lastName: actionData?.fields?.firstName || '',
   })
 
+  //  se encargará de actualizar el estado formData
+  // recibe dos argumentos
+  const handleInputChange = (
+    // evento de cambio de entrada
+    event: React.ChangeEvent<HTMLInputElement>,
+    //clave del campo que se va a actualizar en formData
+    field: string
+  ) => {
+    //actualiza el estado de formData mediante
+    // la función de actualización pasada como argumento
+    setFormData((form) => ({ ...form, [field]: event.target.value }));
+    //(form)función de actualización del estado que se pasa a setFormData
+    // setFormData realiza una copia utilizando el operador spread (...form)
+    //La función de actualización toma el estado actual de formData (form en este caso)
+    // realiza una copia del mismo utilizando el operador spread (...form)
+    //y luego reemplaza el valor del campo especificado
+    //([field]) con el nuevo valor del evento (event.target.value)
+
+  };
 
     useEffect(() => {
     if (!firstLoad.current) {
@@ -127,27 +145,7 @@ export default function Login() {
     }
   }, [formData])
 
-  //useEffect(() => { firstLoad.current = false }, [])
-
-  //  se encargará de actualizar el estado formData
-  // recibe dos argumentos
-  const handleInputChange = (
-    // evento de cambio de entrada
-    event: React.ChangeEvent<HTMLInputElement>,
-    //clave del campo que se va a actualizar en formData
-    field: string
-  ) => {
-    //actualiza el estado de formData mediante
-    // la función de actualización pasada como argumento
-    setFormData((form) => ({ ...form, [field]: event.target.value }));
-    //(form)función de actualización del estado que se pasa a setFormData
-    // setFormData realiza una copia utilizando el operador spread (...form)
-    //La función de actualización toma el estado actual de formData (form en este caso)
-    // realiza una copia del mismo utilizando el operador spread (...form)
-    //y luego reemplaza el valor del campo especificado
-    //([field]) con el nuevo valor del evento (event.target.value)
-
-  };
+  useEffect(() => { firstLoad.current = false }, [])
 
   return (
     <Layout>

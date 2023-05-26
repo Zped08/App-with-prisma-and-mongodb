@@ -1,6 +1,6 @@
-import { registerForm, LoginForm } from "./types.server";
-import { prisma } from "./prisma.server";
 import {redirect, json, createCookieSessionStorage } from "@remix-run/node";
+import { RegisterForm, LoginForm } from "./types.server";
+import { prisma } from "./prisma.server";
 import { createUser } from "./user.server";
 import bcrypt from 'bcryptjs'
 
@@ -29,25 +29,10 @@ const storage = createCookieSessionStorage({
   },
 })
 
-//crea una nueva sesión
-export async function createUserSession(userId: string, redirectTo: string) {
-  // Se utiliza la función storage.getSession() para obtener la sesión actual.
-  const session = await storage.getSession()
-  //establece el ID de usuario de esa sesión en el ID del usuario que ha iniciado sesión.
-  session.set('userId', userId)
-  //redirige al usuario a una ruta que puede especificar al llamar a esta función.
-  return redirect(redirectTo, {
-    //confirma la sesión al configurar el encabezado de la cookie.
-    headers: {
-      'Set-Cookie': await storage.commitSession(session),
-    },
-  })
-}
-
 //recibe un parámetro users de tipo registerForm,
 //que probablemente sea un objeto que contiene información
 //sobre el usuario que se está registrando.
-export async function register(users: registerForm) {
+export async function register(users: RegisterForm) {
   //se utiliza await para realizar una consulta a la base de datos utilizando prisma
   //La consulta verifica si ya existe un usuario con el mismo correo electrónico (email) en la base de datos.
   const exists = await prisma.user.count({ where: { email: users.email } });
@@ -72,6 +57,8 @@ export async function register(users: registerForm) {
     return createUserSession(newUser.id, '/');
 }
 
+// Validate the user on email & password
+
 export async function login({ email, password }: LoginForm) {
   console.log(login)
   // 2
@@ -89,7 +76,23 @@ export async function login({ email, password }: LoginForm) {
 }
 
 
+//crea una nueva sesión
+export async function createUserSession(userId: string, redirectTo: string) {
+  // Se utiliza la función storage.getSession() para obtener la sesión actual.
+  const session = await storage.getSession()
+  //establece el ID de usuario de esa sesión en el ID del usuario que ha iniciado sesión.
+  session.set('userId', userId)
+  //redirige al usuario a una ruta que puede especificar al llamar a esta función.
+  return redirect(redirectTo, {
+    //confirma la sesión al configurar el encabezado de la cookie.
+    headers: {
+      'Set-Cookie': await storage.commitSession(session),
+    },
+  })
+}
+
 /* ***Authorize users on private routes*** */
+
 
 
 // request representa el objeto de solicitud HTTP recibido 
