@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import type { registerForm } from "./types.server";
 import { prisma } from "./prisma.server";
 
+/* **** Aqui iran las funciones relacionadas usuario **** */
+
 //Esta función toma un parámetro user de tipo registerForm,
 //que probablemente contiene información sobre el usuario que se va a crear.
 export const createUser = async (user: registerForm) => {
@@ -26,3 +28,17 @@ export const createUser = async (user: registerForm) => {
   //(newUser.id) y el correo electrónico del usuario (user.email).
   return { id: newUser.id, email: user.email };
 };
+
+
+export const getOtherUsers = async (userId: string) => {
+  return prisma.user.findMany({
+    where: {
+      id: { not: userId }, // especifica que se deben buscar registros cuyo campo id no sea igual al valor de userId proporcionado. Es decir, se excluye al usuario actual.
+    },
+    orderBy: {
+      profile: {
+        firstName: 'asc',
+      },
+    },
+  })
+}
