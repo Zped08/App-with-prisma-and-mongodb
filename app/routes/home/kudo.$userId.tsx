@@ -1,23 +1,16 @@
-import { json, LoaderFunction, redirect } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { getUserById } from "~/utils/user.server";
-import { Portal } from '~/components/portal'
+import { json, LoaderFunction } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
 
-// 1Extrae el campo params de la función del cargador.
+// 1
 export const loader: LoaderFunction = async ({ request, params }) => {
-  // 2Luego userId toma el valor
-  const { userId } = params;
-  if (typeof userId !== "string") {
-    return json({ userId });
-  }
-  const recipient = await getUserById(userId);
-  return json({ recipient });
-};
+  // 2
+  const { userId } = params
 
+  return json({ userId })
+}
 export default function KudoModal() {
-  // 3 recupera los datos del loader function using
-  //Remix's userLoaderData hook and renders the userId en la pantalla.
-  const data = useLoaderData();
-/*   return <h2> User: {data.userId} </h2>; */
-  return <Portal wrapperId="kudo-modal">{/* ... */}</Portal>
+  // 3
+  const data = useLoaderData()
+    
+  return <h2> User: {data.userId} </h2>
 }

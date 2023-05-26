@@ -33,7 +33,7 @@ export const createUser = async (user: RegisterForm) => {
 export const getOtherUsers = async (userId: string) => {
   return prisma.user.findMany({
     where: {
-      id: { not: userId }, // especifica que se deben buscar registros cuyo campo id no sea igual al valor de userId proporcionado. Es decir, se excluye al usuario actual.
+      id: { not: userId },
     },
     orderBy: {
       profile: {
@@ -43,10 +43,11 @@ export const getOtherUsers = async (userId: string) => {
   })
 }
 
-/* export const getUserById = async (userId: string) => {
+/* 
+ export const getUserById = async (userId: string) => {
   return await prisma.user.findUnique({
     where: {
       id: userId,
     },
   })
-} */
+}  */
